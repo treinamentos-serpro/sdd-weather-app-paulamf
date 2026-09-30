@@ -1,47 +1,63 @@
-/**
- * Contratos de domínio compartilhados do Weather App.
- *
- * Decisão de arquitetura: as temperaturas são sempre armazenadas em Celsius
- * internamente e convertidas apenas na camada de apresentação. Assim, a troca
- * de unidade (C/F) nunca dispara um novo request.
- */
-
 export type Unit = 'celsius' | 'fahrenheit';
 
-/** Resultado da API de geocoding (uma cidade). */
 export interface City {
   id: number;
   name: string;
-  country: string;
-  /** Estado/região, quando disponível (ajuda a desambiguar homônimos). */
-  admin1?: string;
+  country?: string;
+  administrativeRegions: string[];
   latitude: number;
   longitude: number;
 }
 
-/** Condições atuais. Temperatura sempre em °C. */
 export interface CurrentWeather {
-  temperature: number;
+  temperatureC: number;
+  apparentTemperatureC?: number;
+  relativeHumidityPercent?: number;
+  windSpeedKmh?: number;
+  precipitationMm?: number;
+  pressureHpa?: number;
   weatherCode: number;
-  humidity: number;
-  windSpeed: number;
-  pressure: number;
-  precipitation: number;
-  time: string;
+  referenceTime: string;
 }
 
-/** Um dia da previsão. Temperaturas sempre em °C. */
 export interface ForecastDay {
-  date: string;
-  min: number;
-  max: number;
+  localDate: string;
+  minimumC: number;
+  maximumC: number;
   weatherCode: number;
-  precipitationProbability: number;
+  precipitationProbabilityPercent?: number;
 }
 
-/** Agregado entregue à UI: cidade + clima atual + 5 dias de previsão. */
 export interface WeatherData {
   city: City;
+  timeZone: string;
+  utcOffsetSeconds: number;
   current: CurrentWeather;
-  forecast: ForecastDay[];
+  forecastDays: ForecastDay[];
 }
+
+export type RequestError =
+  | {
+      kind: 'network' | 'timeout' | 'rate-limit' | 'server';
+      message: string;
+      retryable: true;
+    }
+  | {
+      kind: 'api' | 'invalid-response';
+      message: string;
+      retryable: false;
+    };
+
+export type SearchState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; results: City[] }
+  | { status: 'empty' }
+  | { status: 'error'; error: RequestError };
+
+export type ForecastState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: WeatherData; partial: boolean }
+  | { status: 'empty' }
+  | { status: 'error'; error: RequestError };
