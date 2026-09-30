@@ -1,47 +1,54 @@
-import { useState, type FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
   disabled?: boolean;
 }
 
-/** Barra de busca de cidade. Bloqueia submit com input vazio. */
-export default function SearchBar({ onSearch, disabled }: SearchBarProps) {
-  const [value, setValue] = useState('');
+export default function SearchBar({ onSearch, disabled = false }: SearchBarProps) {
+  const [city, setCity] = useState('');
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    onSearch(trimmed);
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedCity = city.trim();
+    if (!trimmedCity || disabled) {
+      return;
+    }
+
+    onSearch(trimmedCity);
   }
 
   return (
-    <form role="search" onSubmit={handleSubmit} className="w-full max-w-md">
-      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md focus-within:border-accent-500">
-        <span aria-hidden="true" className="text-white/50">
-          🔍
-        </span>
-        <label htmlFor="city-search" className="sr-only">
-          Buscar cidade
+    <form
+      className="flex w-full flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-4 shadow-glass backdrop-blur-md sm:flex-row sm:items-end"
+      role="search"
+      aria-label="Buscar cidade"
+      onSubmit={handleSubmit}
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <label className="text-sm font-medium text-white" htmlFor="city-search">
+          Cidade
         </label>
         <input
+          className="w-full rounded-lg border border-white/10 bg-night-800 px-3 py-2 text-white outline-none placeholder:text-white/50 focus:border-accent-400 focus:ring-2 focus:ring-accent-400/40 disabled:cursor-not-allowed disabled:opacity-60"
           id="city-search"
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Buscar cidade…"
-          autoComplete="off"
-          className="flex-1 bg-transparent text-white placeholder-white/40 outline-none"
+          name="city"
+          type="search"
+          value={city}
+          onChange={(event) => setCity(event.target.value)}
+          placeholder="Digite uma cidade"
+          autoComplete="address-level2"
+          disabled={disabled}
         />
-        <button
-          type="submit"
-          disabled={disabled || !value.trim()}
-          className="rounded-lg bg-accent-500 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Buscar
-        </button>
       </div>
+      <button
+        className="rounded-lg bg-accent-500 px-4 py-2 font-medium text-white transition-colors hover:bg-accent-600 active:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2 focus:ring-offset-night-900 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent-500"
+        type="submit"
+        disabled={disabled}
+      >
+        Buscar
+      </button>
     </form>
   );
 }

@@ -1,28 +1,35 @@
-import type { ForecastDay, Unit } from '../types/weather';
+import { formatDayLabel } from '../lib/format';
 import { formatTemperature } from '../lib/temperature';
-import { getWeatherIcon, getWeatherLabel } from '../lib/weatherCodes';
-import { getDayLabel, getShortDate } from '../lib/format';
+import { getWeatherCondition } from '../lib/weatherCodes';
+import type { ForecastDay, Unit } from '../types/weather';
 
 interface ForecastCardProps {
   day: ForecastDay;
-  index: number;
   unit: Unit;
 }
 
-/** Card de um dia da previsão. */
-export default function ForecastCard({ day, index, unit }: ForecastCardProps) {
+export default function ForecastCard({ day, unit }: ForecastCardProps) {
+  const condition = getWeatherCondition(day.weatherCode);
+  const precipitation = day.precipitationProbabilityPercent;
+
   return (
-    <li className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-md">
-      <p className="font-semibold">{getDayLabel(day.date, index)}</p>
-      <p className="text-xs text-white/50">{getShortDate(day.date)}</p>
-      <span aria-hidden="true" className="text-3xl" title={getWeatherLabel(day.weatherCode)}>
-        {getWeatherIcon(day.weatherCode)}
-      </span>
-      <p className="text-sm">
-        <span className="font-semibold">{formatTemperature(day.max, unit)}</span>{' '}
-        <span className="text-white/50">{formatTemperature(day.min, unit)}</span>
+    <article className="min-w-0 rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-md sm:p-4">
+      <time className="block text-sm font-medium capitalize text-white" dateTime={day.localDate}>
+        {formatDayLabel(day.localDate)}
+      </time>
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <span className="shrink-0 text-3xl" aria-hidden="true">
+          {condition.icon}
+        </span>
+        <div className="min-w-0 text-right">
+          <p className="font-semibold text-white">{formatTemperature(day.maximumC, unit)}</p>
+          <p className="text-sm text-white/60">{formatTemperature(day.minimumC, unit)}</p>
+        </div>
+      </div>
+      <p className="mt-3 break-words text-sm text-white/70">{condition.label}</p>
+      <p className="mt-2 text-xs text-white/60">
+        Chuva: {precipitation === undefined ? 'Indisponível' : `${precipitation}%`}
       </p>
-      <p className="text-xs text-accent-400">💧 {day.precipitationProbability}%</p>
-    </li>
+    </article>
   );
 }

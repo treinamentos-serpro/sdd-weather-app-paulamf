@@ -1,18 +1,24 @@
-import { describe, it, expect } from 'vitest';
-import { getDayLabel, getShortDate } from '../../src/lib/format';
+import { describe, expect, it } from 'vitest';
+import { formatDayLabel, getShortDate } from '../../src/lib/format';
 
-describe('format', () => {
-  it('rotula o primeiro e o segundo dia', () => {
-    expect(getDayLabel('2026-06-16', 0)).toBe('Hoje');
-    expect(getDayLabel('2026-06-17', 1)).toBe('Amanhã');
+describe('formatDayLabel', () => {
+  const referenceDate = new Date('2026-09-30T12:00:00');
+
+  it('retorna "Hoje" para o índice 0', () => {
+    expect(formatDayLabel('2026-09-30', referenceDate)).toBe('Hoje');
   });
 
-  it('usa dia da semana para os demais', () => {
-    // 2026-06-18 é uma quinta-feira.
-    expect(getDayLabel('2026-06-18', 2)).toBe('Qui');
+  it('retorna "Amanhã" para o índice 1', () => {
+    expect(formatDayLabel('2026-10-01', referenceDate)).toBe('Amanhã');
   });
 
-  it('formata data curta', () => {
-    expect(getShortDate('2026-06-16')).toBe('16 Jun');
+  it('retorna o dia da semana para os demais índices', () => {
+    expect(formatDayLabel('2026-10-02', referenceDate)).toBe('sex');
+  });
+});
+
+describe('getShortDate', () => {
+  it('formata uma data ISO como dia e mês', () => {
+    expect(getShortDate('2026-09-30')).toBe('30/09');
   });
 });
